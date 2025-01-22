@@ -1,4 +1,4 @@
-# lotview
+# LotView
 
 Suivi des lots
 
