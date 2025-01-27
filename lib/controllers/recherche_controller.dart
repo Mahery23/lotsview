@@ -1,14 +1,20 @@
-// Importation des modèles nécessaires pour l'enseigne et le service API
-import 'package:lotview/models/enseigne.dart';
-import 'package:lotview/services/api_service.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/enseigne.dart';
+import '../services/api_service.dart';
+import '../controllers/auth_controller.dart';
 
-// Classe contrôleur pour la recherche des enseignes
 class RechercheController {
-  final ApiService apiService = ApiService(); // Instance du service API pour récupérer les données des enseignes
+  final ApiService apiService = ApiService();
 
-  // Méthode asynchrone pour récupérer les enseignes depuis l'API via le service
-  Future<List<Enseigne>> fetchEnseignes() async {
-    // Appel de la méthode fetchEnseignes du service API et retour des résultats
-    return await apiService.fetchEnseignes();
+  Future<List<Enseigne>> fetchEnseignes(BuildContext context) async {
+    final authController = Provider.of<AuthController>(context, listen: false);
+    final token = authController.token;
+
+    if (token == null) {
+      throw Exception("Utilisateur non authentifié.");
+    }
+
+    return await apiService.fetchEnseignes(token);
   }
 }

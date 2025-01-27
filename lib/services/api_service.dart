@@ -1,46 +1,36 @@
-import 'dart:convert';  // Pour utiliser jsonDecode
+import 'dart:convert';  // Pour jsonDecode
 import 'package:http/http.dart' as http;  // Pour effectuer les requêtes HTTP
-import 'package:lotview/models/enseigne.dart';  // Importation du modèle Enseigne
+import '../models/enseigne.dart';  // Modèle Enseigne
 
 class ApiService {
-  // URL de l'API et Bearer Token
-  final String apiUrl = 'http://192.168.230.13:93/api/Preview/enseigneList';
-  final String bearerToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IklUUFJPRCIsInN1YiI6IklUUFJPRCIsImp0aSI6IjE3NTdhMmY4LTZkYmMtNGNiOS05ODg3LTEyNDBjOWY1NGVkOCIsIm5iZiI6MTczNzk2MDQxOCwiZXhwIjoxNzM3OTgyMDE4LCJpYXQiOjE3Mzc5NjA0MTh9.Las_FXk5yK5KaosBxfmKY80nqJy0lavpokDNM6uEL_Q';
+  final String baseUrl = 'http://192.168.230.13:93/api';
 
-  // Méthode pour récupérer les enseignes depuis l'API
-  Future<List<Enseigne>> fetchEnseignes() async {
-    try {
-      final response = await http.get(
-        Uri.parse(apiUrl),
-        headers: {
-          'Authorization': 'Bearer $bearerToken',
-          'Content-Type': 'application/json',
-        },
-      );
+  Future<List<Enseigne>> fetchEnseignes(String token) async {
+    final url = Uri.parse('$baseUrl/Preview/enseigneList');
 
-      // Vérifier si la requête a réussi (status 200)
-      if (response.statusCode == 200) {
-        final decodedResponse = jsonDecode(response.body);
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
 
-        // Vérifier la structure de la réponse
-        if (decodedResponse is Map<String, dynamic> && decodedResponse.containsKey('data')) {
-          final data = decodedResponse['data'];
+    if (response.statusCode == 200) {
+      final decodedResponse = jsonDecode(response.body);
 
-          // Vérifier si 'data' est une liste de chaînes de caractères
-          if (data is List) {
-            return data.map((item) => Enseigne(name: item.toString())).toList();
-          } else {
-            throw Exception('La clé "data" ne contient pas une liste de chaînes');
-          }
+      if (decodedResponse is Map<String, dynamic> && decodedResponse.containsKey('data')) {
+        final data = decodedResponse['data'];
+        if (data is List) {
+          return data.map((item) => Enseigne(name: item.toString())).toList();
         } else {
-          throw Exception('Réponse malformée : clé "data" manquante');
+          throw Exception('La clé "data" ne contient pas une liste.');
         }
       } else {
-        throw Exception('Échec de la requête : ${response.statusCode}');
+        throw Exception('Réponse malformée : clé "data" manquante.');
       }
-    } catch (e) {
-      // Gérer les erreurs réseau ou autres exceptions
-      throw Exception('Erreur lors de la récupération des enseignes : $e');
+    } else {
+      throw Exception('Erreur API : ${response.statusCode}');
     }
   }
 }
