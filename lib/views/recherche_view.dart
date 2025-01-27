@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:lotview/controllers/recherche_controller.dart';
-import 'package:lotview/views/resultats_view.dart';
-import 'package:lotview/views/login_view.dart';
+import 'package:provider/provider.dart';
+import '../controllers/recherche_controller.dart';
+import '../controllers/auth_controller.dart';
+import '../views/result_display_screen.dart';
+import '../views/login_page.dart';
 
-// Widget de la page de recherche, contient la page de recherche
 class RecherchePage extends StatefulWidget {
   const RecherchePage({super.key});
 
@@ -11,7 +12,6 @@ class RecherchePage extends StatefulWidget {
   _RecherchePageState createState() => _RecherchePageState();
 }
 
-// State associé à la RecherchePage, gère la logique de la page
 class _RecherchePageState extends State<RecherchePage> {
   List<bool> checkboxValues = [];
   bool _toutesSelected = true;
@@ -24,13 +24,12 @@ class _RecherchePageState extends State<RecherchePage> {
   @override
   void initState() {
     super.initState();
-    _loadEnseignes();  // Charger les enseignes dès le début
+    _loadEnseignes();
   }
 
-  // Chargement des enseignes depuis l'API
   Future<void> _loadEnseignes() async {
     try {
-      final enseignes = await controller.fetchEnseignes();
+      final enseignes = await controller.fetchEnseignes(context);
       setState(() {
         checkboxLabels = enseignes.map((e) => e.name).toList();
         checkboxValues = List.filled(checkboxLabels.length, true);
@@ -40,25 +39,40 @@ class _RecherchePageState extends State<RecherchePage> {
       setState(() {
         isLoading = false;
       });
-      print('Erreur lors du chargement des enseignes : $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur : $e')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final authController = Provider.of<AuthController>(context);
+
     return Scaffold(
-      appBar: _buildAppBar(),
+      appBar: AppBar(
+        title: const Text('Recherche et Filtrage'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              authController.logout();
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+          ),
+        ],
+      ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())  // Afficher un loader si les données sont en cours de chargement
+          ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _buildPeriodSelectionCard(),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   _buildFilterOptionsCard(),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   _buildSearchButton(),
                 ],
               ),
@@ -170,7 +184,7 @@ class _RecherchePageState extends State<RecherchePage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ResultatsPage(
+              builder: (context) => ResultDisplayScreen(
                 dateDebut: _dateDebut,
                 dateFin: _dateFin,
                 enseignes: _getSelectedEnseignes(),
