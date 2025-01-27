@@ -1,36 +1,24 @@
 import 'package:flutter/material.dart';
-import 'views/login_page.dart';
-import 'views/home_page.dart';
+import 'views/login_view.dart';
+import 'views/recherche_view.dart';
 
-/*
-void main() => runApp(MyApp());
+void main() {
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Gestion des lots',
+      title: 'Application de suivi des lots',
       initialRoute: '/',
       routes: {
         '/': (context) => LoginPage(),
-        '/home': (context) => HomePage(),
+        '/recherche': (context) => RecherchePage(),
       },
     );
   }
 }
-*/
-
-/*import 'package:flutter/material.dart';
-import 'views/login_page.dart';
-
-void main() => runApp(MaterialApp(home: LoginPage()));
-@override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Suivi des Lots',
-      home: ResultDisplayScreen(),
-    );
-  }
-*/
