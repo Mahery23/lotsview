@@ -3,16 +3,15 @@ import 'package:provider/provider.dart';
 import '../controllers/recherche_controller.dart';
 import '../controllers/auth_controller.dart';
 import '../views/result_display_screen.dart';
-import '../views/login_page.dart';
 
 class RecherchePage extends StatefulWidget {
   const RecherchePage({super.key});
 
   @override
-  _RecherchePageState createState() => _RecherchePageState();
+  RecherchePageState createState() => RecherchePageState();
 }
 
-class _RecherchePageState extends State<RecherchePage> {
+class RecherchePageState extends State<RecherchePage> {
   List<bool> checkboxValues = [];
   bool _toutesSelected = true;
   DateTime _dateDebut = DateTime.now();
@@ -80,52 +79,6 @@ class _RecherchePageState extends State<RecherchePage> {
     );
   }
 
-  // Construire l'AppBar avec bouton de déconnexion
-  AppBar _buildAppBar() {
-    return AppBar(
-      title: Text('Recherche et Filtrage'),
-      actions: [
-        IconButton(
-          icon: Icon(Icons.logout),
-          onPressed: _confirmLogout,
-        ),
-      ],
-    );
-  }
-
-  // Boîte de dialogue de confirmation avant la déconnexion
-  void _confirmLogout() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Déconnexion'),
-          content: Text('Êtes-vous sûr de vouloir vous déconnecter ?'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Annuler'),
-            ),
-            TextButton(
-              onPressed: _logout,
-              child: Text('Déconnexion', style: TextStyle(color: Colors.red)),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Fonction de déconnexion
-  void _logout() {
-    Navigator.of(context).pop(); // Fermer la boîte de dialogue
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => LoginPage()),
-      (Route<dynamic> route) => false, // Supprime tout l'historique de navigation
-    );
-  }
-
   // Carte de sélection de période
   Widget _buildPeriodSelectionCard() {
     return _buildCard(
@@ -140,7 +93,6 @@ class _RecherchePageState extends State<RecherchePage> {
     );
   }
 
-  // Description pour la sélection de période
   Widget _buildPeriodDescription() {
     return Text(
       'Veuillez choisir une date de début et une date de fin pour effectuer la recherche.',
@@ -164,7 +116,6 @@ class _RecherchePageState extends State<RecherchePage> {
     );
   }
 
-  // Description pour la section de filtrage
   Widget _buildFilterDescription() {
     return Text(
       'Utilisez le switch "Toutes" pour sélectionner ou désélectionner toutes les options.',
@@ -172,7 +123,6 @@ class _RecherchePageState extends State<RecherchePage> {
     );
   }
 
-  // Bouton de recherche
   Widget _buildSearchButton() {
     return ElevatedButton.icon(
       onPressed: () {
@@ -181,16 +131,17 @@ class _RecherchePageState extends State<RecherchePage> {
           _showErrorDialog('La date de fin ne peut pas être antérieure à la date de début.');
         } else {
           // Naviguer vers la page des résultats avec les paramètres de recherche
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ResultDisplayScreen(
-                dateDebut: _dateDebut,
-                dateFin: _dateFin,
-                enseignes: _getSelectedEnseignes(),
-              ),
-            ),
-          );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ResultDisplayScreen(
+            dateDebut: _dateDebut,
+            dateFin: _dateFin,
+            enseignes: _getSelectedEnseignes(),
+          ),
+        ),
+);
+
         }
       },
       icon: Icon(Icons.search, color: Colors.white),
@@ -254,7 +205,6 @@ class _RecherchePageState extends State<RecherchePage> {
     );
   }
 
-  // Sélecteur de date
   Expanded _buildDateSelector(String label, DateTime date, bool isStartDate) {
     return Expanded(
       child: Column(
@@ -318,7 +268,6 @@ class _RecherchePageState extends State<RecherchePage> {
     );
   }
 
-  // Afficher une case à cocher avec son étiquette
   Widget _buildCheckbox(String label, bool value, int index) {
     return Row(
       children: [
@@ -337,7 +286,6 @@ class _RecherchePageState extends State<RecherchePage> {
     );
   }
 
-  // Récupérer la liste des enseignes sélectionnées
   List<String> _getSelectedEnseignes() {
     return List.generate(checkboxLabels.length, (index) {
       if (checkboxValues[index]) return checkboxLabels[index];

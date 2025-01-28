@@ -1,7 +1,10 @@
-import '../services/auth_service.dart';
+import '../services/api_result_services.dart';
 
 class LoginController {
-  final AuthService _authService = AuthService();
+  final ApiService _apiService;
+
+  // Injecter ApiService
+  LoginController(this._apiService);
 
   Future<String> login({required String username, required String password}) async {
     if (username.isEmpty || password.isEmpty) {
@@ -9,15 +12,16 @@ class LoginController {
     }
 
     try {
-      final token = await _authService.authenticate(username, password);
+      // Appel de la méthode authenticate
+      final token = await _apiService.authenticate(username, password);
 
       if (token != null) {
-        return "success";
+        return "success"; // Connexion réussie
       } else {
-        return "Identifiant ou mot de passe incorrect";
+        return "Identifiant ou mot de passe incorrect"; // Authentification échouée
       }
     } catch (e) {
-      return "Erreur : ${e.toString()}";
+      return "Erreur : ${e.toString()}"; // Gérer les exceptions
     }
   }
 }

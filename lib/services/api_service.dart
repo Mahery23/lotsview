@@ -2,7 +2,7 @@ import 'dart:convert';  // Pour jsonDecode
 import 'package:http/http.dart' as http;  // Pour effectuer les requêtes HTTP
 import '../models/enseigne.dart';  // Modèle Enseigne
 
-class ApiService {
+class EnseigneApiService {
   final String baseUrl = 'http://192.168.230.13:93/api';
 
   Future<List<Enseigne>> fetchEnseignes(String token) async {
