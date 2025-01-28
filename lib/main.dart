@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'controllers/auth_controller.dart';
 import 'controllers/result_controller.dart';
-import 'services/api_service.dart'; // Importer ApiService pour la gestion des résultats
-import 'views/login_page.dart';         // Page de connexion
-import 'views/recherche_view.dart';    // Vue de recherche
-import 'views/result_display_screen.dart';  // Affichage des résultats
+import 'services/api_service.dart';
+import 'views/login_page.dart';
+import 'views/recherche_view.dart';
+import 'views/result_display_screen.dart';
+import 'controllers/recherche_controller.dart'; // Ajout
 
 void main() {
   runApp(const MyApp());
@@ -16,12 +17,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ApiService apiService = ApiService('http://192.168.230.13:93/api');
+    final ApiService apiService = ApiService('http://192.168.230.13:93/api'); // Instance unique
 
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => ResultController(apiService)),
-        ChangeNotifierProvider(create: (context) => AuthController(apiService)),
+        // Fournit ApiService (unique)
+        Provider<ApiService>.value(value: apiService),
+
+        // Fournit les contrôleurs dépendants d'ApiService
+        ChangeNotifierProvider(create: (_) => AuthController(apiService)),
+        ChangeNotifierProvider(create: (_) => ResultController(apiService)),
+
+        // Ajoute RechercheController
+        Provider(create: (_) => RechercheController(apiService)),
       ],
       child: MaterialApp(
         title: 'Application Résultats',
@@ -43,4 +51,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

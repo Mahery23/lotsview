@@ -24,4 +24,5 @@ class LoginController {
       return "Erreur : ${e.toString()}"; // Gérer les exceptions
     }
   }
+
 }

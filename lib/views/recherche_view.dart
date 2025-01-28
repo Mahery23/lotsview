@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:lotview/services/api_service.dart';
 import 'package:provider/provider.dart';
 import '../controllers/recherche_controller.dart';
 import '../controllers/auth_controller.dart';
 import '../views/result_display_screen.dart';
+
 
 class RecherchePage extends StatefulWidget {
   const RecherchePage({super.key});
@@ -18,31 +20,45 @@ class RecherchePageState extends State<RecherchePage> {
   DateTime _dateFin = DateTime.now();
   List<String> checkboxLabels = [];
   bool isLoading = true;
-  final RechercheController controller = RechercheController();
+  late RechercheController controller;
+  
 
   @override
   void initState() {
     super.initState();
+    controller = RechercheController(Provider.of<ApiService>(context, listen: false));
     _loadEnseignes();
   }
 
-  Future<void> _loadEnseignes() async {
-    try {
-      final enseignes = await controller.fetchEnseignes(context);
+
+
+ Future<void> _loadEnseignes() async {
+  try {
+    final enseignes = await controller.fetchEnseignes(context);
+
+    // Utilisation de addPostFrameCallback pour différer setState()
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
         checkboxLabels = enseignes.map((e) => e.name).toList();
         checkboxValues = List.filled(checkboxLabels.length, true);
         isLoading = false;
       });
-    } catch (e) {
+    });
+  } catch (e) {
+    // Gérer l'erreur après le rendu du widget
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
         isLoading = false;
       });
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur : $e')),
       );
-    }
+    });
   }
+}
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -131,17 +147,16 @@ class RecherchePageState extends State<RecherchePage> {
           _showErrorDialog('La date de fin ne peut pas être antérieure à la date de début.');
         } else {
           // Naviguer vers la page des résultats avec les paramètres de recherche
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ResultDisplayScreen(
-            dateDebut: _dateDebut,
-            dateFin: _dateFin,
-            enseignes: _getSelectedEnseignes(),
-          ),
-        ),
-);
-
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ResultDisplayScreen(
+                dateDebut: _dateDebut,
+                dateFin: _dateFin,
+                enseignes: _getSelectedEnseignes(),
+              ),
+            ),
+          );
         }
       },
       icon: Icon(Icons.search, color: Colors.white),

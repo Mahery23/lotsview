@@ -5,7 +5,9 @@ import '../services/api_service.dart';
 import '../controllers/auth_controller.dart';
 
 class RechercheController {
-  final ApiService apiService = ApiService();
+  final ApiService apiService;
+
+  RechercheController(this.apiService);
 
   Future<List<Enseigne>> fetchEnseignes(BuildContext context) async {
     final authController = Provider.of<AuthController>(context, listen: false);

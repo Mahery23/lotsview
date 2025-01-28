@@ -77,7 +77,16 @@ class ApiService {
         if (decodedResponse is Map<String, dynamic> && decodedResponse.containsKey('data')) {
           final data = decodedResponse['data'];
           if (data is List) {
-            return data.map((item) => Enseigne(name: item.toString())).toList();
+            // Mapping des données en objets Enseigne
+            return data.map((item) {
+              if (item is String) {
+                return Enseigne(name: item);
+              } else if (item is Map<String, dynamic>) {
+                // Si l'item est un objet complexe, ajustez ce mapping selon votre modèle
+                return Enseigne(name: item['name'] ?? 'Nom inconnu');
+              }
+              throw Exception('Format inattendu pour un item de la liste des enseignes');
+            }).toList();
           } else {
             throw Exception('La clé "data" ne contient pas une liste.');
           }
