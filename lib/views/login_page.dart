@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../controllers/login_controller.dart';
-import '../services/api_result_services.dart';
+import '../services/api_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -43,7 +43,7 @@ class LoginPageState extends State<LoginPage> {
     });
 
     if (result == "success") {
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(context, '/recherche');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(result)),
