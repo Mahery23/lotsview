@@ -1,19 +1,30 @@
 import 'package:flutter/material.dart';
 import '../controllers/login_controller.dart';
+import '../services/api_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  LoginPageState createState() => LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final LoginController _loginController = LoginController();
+
+  // Fournir une URL de base pour l'API
+  final ApiService _apiService = ApiService('http://192.168.230.13:93/api'); // Remplace cette URL par celle de ton API
+
+  // Initialisation de LoginController avec l'instance d'ApiService
+  late final LoginController _loginController;
 
   bool _isLoading = false;
+
+  // Le constructeur pour initialiser LoginController avec ApiService
+  LoginPageState() {
+    _loginController = LoginController(_apiService);
+  }
 
   void _login() async {
     setState(() {
@@ -25,12 +36,14 @@ class _LoginPageState extends State<LoginPage> {
       password: _passwordController.text,
     );
 
+    if (!mounted) return; // Vérifie si le widget est toujours monté
+
     setState(() {
       _isLoading = false;
     });
 
     if (result == "success") {
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(context, '/recherche');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(result)),

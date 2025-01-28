@@ -1,36 +1,95 @@
-import 'dart:convert';  // Pour jsonDecode
-import 'package:http/http.dart' as http;  // Pour effectuer les requêtes HTTP
-import '../models/enseigne.dart';  // Modèle Enseigne
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../models/enseigne.dart'; // Modèle Enseigne
 
 class ApiService {
-  final String baseUrl = 'http://192.168.230.13:93/api';
+  final String baseUrl;
 
+  ApiService(this.baseUrl);
+
+  /// Authentifie l'utilisateur et retourne un token
+  Future<String?> authenticate(String username, String password) async {
+    final url = Uri.parse('$baseUrl/AuthManagement/Login');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"username": username, "password": password}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data["token"];
+      } else {
+        print("Erreur de connexion : ${response.body}");
+        return null;
+      }
+    } catch (e) {
+      print("Erreur lors de l'authentification : $e");
+      return null;
+    }
+  }
+
+  /// Récupère les résultats entre deux dates pour une enseigne donnée
+  Future<List<dynamic>?> fetchResults(String token, String dateFrom, String dateTo, String enseignes) async {
+    final url = Uri.parse('$baseUrl/Preview/previews').replace(queryParameters: {
+      "Datefrom": dateFrom,
+      "Dateto": dateTo,
+      "Enseignes": enseignes,
+    });
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {"Authorization": "Bearer $token"},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['data'];
+      } else {
+        print("Erreur API : ${response.body}");
+        return null;
+      }
+    } catch (e) {
+      print("Erreur lors de la récupération des résultats : $e");
+      return null;
+    }
+  }
+
+  /// Récupère la liste des enseignes
   Future<List<Enseigne>> fetchEnseignes(String token) async {
     final url = Uri.parse('$baseUrl/Preview/enseigneList');
 
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final decodedResponse = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final decodedResponse = jsonDecode(response.body);
 
-      if (decodedResponse is Map<String, dynamic> && decodedResponse.containsKey('data')) {
-        final data = decodedResponse['data'];
-        if (data is List) {
-          return data.map((item) => Enseigne(name: item.toString())).toList();
+        if (decodedResponse is Map<String, dynamic> && decodedResponse.containsKey('data')) {
+          final data = decodedResponse['data'];
+          if (data is List) {
+            return data.map((item) => Enseigne(name: item.toString())).toList();
+          } else {
+            throw Exception('La clé "data" ne contient pas une liste.');
+          }
         } else {
-          throw Exception('La clé "data" ne contient pas une liste.');
+          throw Exception('Réponse malformée : clé "data" manquante.');
         }
       } else {
-        throw Exception('Réponse malformée : clé "data" manquante.');
+        throw Exception('Erreur API : ${response.statusCode}');
       }
-    } else {
-      throw Exception('Erreur API : ${response.statusCode}');
+    } catch (e) {
+      print("Erreur lors de la récupération des enseignes : $e");
+      rethrow; // Relance l'exception pour la gestion côté appelant
     }
   }
 }
