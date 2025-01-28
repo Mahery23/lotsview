@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'controllers/auth_controller.dart';
 import 'controllers/result_controller.dart';
-import 'services/api_result_services.dart'; // Importer ResultApiService pour AuthController
-import 'services/api_service.dart'; // Importer EnseigneApiService pour ResultController
+import 'services/api_result_services.dart'; // Importer ApiService pour la gestion des résultats
 import 'views/login_page.dart';         // Page de connexion
 import 'views/recherche_view.dart';    // Vue de recherche
 import 'views/result_display_screen.dart';  // Affichage des résultats
@@ -17,15 +16,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ResultApiService resultApiService = ResultApiService('');
-    final EnseigneApiService apiService = EnseigneApiService();
+    final ApiService resultApiService = ApiService('http://192.168.230.13:93/api/Preview/previews'); // Service pour les résultats
 
     return MultiProvider(
       providers: [
-        // Fournir ResultApiService à AuthController
+        // Fournir ApiService (résultats) à ResultController
+        ChangeNotifierProvider(create: (context) => ResultController(resultApiService)),
+        // Fournir ApiService (résultats) à AuthController (si nécessaire)
         ChangeNotifierProvider(create: (context) => AuthController(resultApiService)),
-        // Fournir EnseigneApiService à ResultController
-        ChangeNotifierProvider(create: (context) => ResultController(apiService)),
       ],
       child: MaterialApp(
         title: 'Application Résultats',
@@ -40,9 +38,9 @@ class MyApp extends StatelessWidget {
             final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
 
             return ResultDisplayScreen(
-              dateDebut: args?['dateDebut'],
-              dateFin: args?['dateFin'],
-              enseignes: List<String>.from(args?['enseignes'] ?? []),
+              dateDebut: args['dateDebut'],
+              dateFin: args['dateFin'],
+              enseignes: List<String>.from(args['enseignes'] ?? []),
             );
           },
         },
